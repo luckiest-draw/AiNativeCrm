@@ -33,7 +33,12 @@ async function rpc(name: string, args: Record<string, unknown>) {
 }
 async function fixture() {
   const email = `presenca-${randomUUID()}@invariant.test`;
-  const { data, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await db.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { locale: "pt-BR" },
+  });
   if (error || !data.user) throw error;
   const user = data.user.id;
   users.push(user);
