@@ -114,8 +114,23 @@ function rotulosDeInterface(textos: string[]): string {
   return textos.filter((t) => t in DICIONARIO).sort().join("\n");
 }
 
+// A contagem e os avisos condicionais do dashboard podem variar enquanto a
+// spec percorre as telas. Os rótulos fixos ainda precisam voltar byte a byte.
+function rotulosDaVolta(tela: string, textos: string[]): string {
+  if (tela !== "/app/metrics") return rotulosDeInterface(textos);
+  const fixos = ["Desempenho", "Atrito", "Performance por atendente", "Todos os atendentes"];
+  return rotulosDeInterface(fixos.filter((rotulo) => textos.includes(rotulo)));
+}
+
 /** Todo texto que a pessoa consegue LER nesta tela, normalizado. */
 async function textosVisiveis(page: Page): Promise<string[]> {
+  if (new URL(page.url()).pathname === "/app/metrics") {
+    // O painel busca seus dados depois da hidratação. Compare os idiomas no
+    // mesmo estado, depois de sair da mensagem de carregamento.
+    await expect(page.getByRole("heading", { name: /^(Atrito|Fricción)$/ })).toBeVisible({
+      timeout: PRAZO,
+    });
+  }
   return page.evaluate(() => {
     const saida: string[] = [];
     const anda = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -409,6 +424,8 @@ test.describe("o idioma escolhido chega à tela", () => {
     for (const tela of TELAS) {
       await page.goto(tela);
       await page.waitForLoadState("networkidle", { timeout: PRAZO });
+      const esperado = rotulosDaVolta(tela, antes.get(tela)!);
+      if (tela === "/app/metrics") expect(esperado.split("\n")).toHaveLength(4);
       // `poll`, e não uma leitura única: `networkidle` diz que a REDE parou, não
       // que a árvore terminou de montar. Medido — uma leitura única pegou
       // /app/contacts com 6 rótulos onde o retrato inicial tinha 39, porque a
@@ -418,11 +435,11 @@ test.describe("o idioma escolhido chega à tela", () => {
       // o poll estoura o prazo e falha com o mesmo diff. O que ele remove é a
       // corrida entre montar e medir — que é ruído, não achado.
       await expect
-        .poll(async () => rotulosDeInterface(await textosVisiveis(page)), {
+        .poll(async () => rotulosDaVolta(tela, await textosVisiveis(page)), {
           timeout: PRAZO,
           message: `a tela ${tela} não voltou ao português idêntico depois de passar pelo espanhol`,
         })
-        .toBe(rotulosDeInterface(antes.get(tela)!));
+        .toBe(esperado);
     }
     await page.screenshot({ path: path.join(EVIDENCIA, "02-inbox-de-volta-em-portugues.png"), fullPage: true });
   });

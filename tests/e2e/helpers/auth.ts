@@ -7,6 +7,11 @@ import { join } from "node:path";
 
 const MAILPIT_URL = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 
+/** O login pode voltar à página inicial ou a uma rota interna solicitada. */
+export function isAppUrl({ pathname }: URL): boolean {
+  return pathname === "/app" || pathname.startsWith("/app/");
+}
+
 /** Parser mínimo de .env.local (os specs rodam fora do runtime Next). */
 export function loadEnvLocal(): Record<string, string> {
   const out: Record<string, string> = {};

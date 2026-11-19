@@ -1029,10 +1029,13 @@ test("pacote pós-build atravessa catálogo, tenants, guia e Tarefas com recuper
     const auditPage = await page.context().newPage();
     observarErros(auditPage, "visualizador de auditoria", observacoes);
     await auditPage.goto("/admin/audit");
-    await expect(auditPage.getByRole("heading", { name: "Audit Log", exact: true })).toBeVisible();
+    await expect(
+      auditPage.getByRole("heading", { name: /^(Audit Log|审计日志|Registro de auditoría)$/ }),
+    ).toBeVisible();
 
     await auditPage.getByRole("button", { name: "Tenants", exact: true }).click();
-    await auditPage.getByPlaceholder("Buscar...").fill(organization.display_name);
+    const buscaAudit = auditPage.getByPlaceholder(/^(Buscar\.\.\.|搜索…)$/);
+    await buscaAudit.fill(organization.display_name);
     await auditPage
       .getByRole("button", {
         name: `${organization.display_name} (${organization.slug})`,
@@ -1042,7 +1045,7 @@ test("pacote pós-build atravessa catálogo, tenants, guia e Tarefas com recuper
     await auditPage.keyboard.press("Escape");
 
     await auditPage.getByRole("button", { name: "Actions", exact: true }).click();
-    await auditPage.getByPlaceholder("Buscar...").fill("extension.configured");
+    await buscaAudit.fill("extension.configured");
     await auditPage.getByRole("button", { name: "extension.configured", exact: true }).click();
     await auditPage.keyboard.press("Escape");
     const respostaFiltrada = auditPage.waitForResponse((response) => {
@@ -1056,7 +1059,9 @@ test("pacote pós-build atravessa catálogo, tenants, guia e Tarefas com recuper
         response.status() === 200
       );
     });
-    await auditPage.getByLabel("Filtrar por actor user ID").fill(atores!.usuarios.owner.id);
+    await auditPage
+      .getByLabel(/^(Filtrar por actor user ID|按操作者用户 ID 筛选)$/)
+      .fill(atores!.usuarios.owner.id);
     await respostaFiltrada;
     await expect(auditPage.locator(`a[href="/admin/audit/${configuredAudit.id}"]`)).toBeVisible({
       timeout: 30_000,

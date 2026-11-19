@@ -39,7 +39,12 @@ test("org única oferece criação, responsável aceita e A→B→A não mistura
   let guestContext;
   try {
     for (const email of [ownerEmail, guestEmail]) {
-      const { data, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
+      const { data, error } = await db.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { locale: "pt-BR" },
+      });
       if (error || !data.user) throw error ?? new Error("user missing");
       users.push(data.user.id);
     }
@@ -133,7 +138,8 @@ test("org única oferece criação, responsável aceita e A→B→A não mistura
     if (update.error) throw update.error;
     await conversation(orgB, `Cliente B ${suffix}`);
     await page.getByRole("link", { name: "Voltar ao aplicativo" }).click();
-    await page.waitForURL("**/app/inbox", { waitUntil: "load" });
+    await page.waitForURL((url) => url.pathname === "/app");
+    await page.goto("/app/inbox");
     await expect(page.locator("[data-conversation-id]").getByText(`Cliente A ${suffix}`, { exact: true })).toBeVisible();
     const cookieBeforeFailure = (await page.context().cookies()).find(cookie => cookie.name === "active_org")?.value;
     await page.route("**/app/**", async route => {
@@ -186,7 +192,9 @@ test("org única oferece criação, responsável aceita e A→B→A não mistura
     await expect(guest.getByTestId("tenant-switcher")).toHaveCount(0);
     await guest.goto(new URL(link).pathname);
     await guest.getByRole("button", { name: "Aceitar convite", exact: true }).click();
+    await guest.waitForURL((url) => url.pathname === "/app");
     await expect(guest.getByTestId("tenant-switcher")).toContainText(`Empresa B ${suffix}`);
+    await guest.goto("/app/inbox");
     await expect(guest.locator("[data-conversation-id]").getByText(`Cliente B ${suffix}`, { exact: true })).toBeVisible();
     const membership = await db.from("user_organizations").select("invited_by,role").eq("organization_id", orgB).eq("user_id", users[1]).single();
     expect(membership.data).toEqual({ invited_by: users[0], role: "admin" });

@@ -1299,6 +1299,22 @@ jobs:
         run: |
           mv supabase/migrations /tmp/migrations-off
           mkdir -p supabase/migrations
+          if [ "${{ matrix.parte }}" = "1" ]; then
+            # Cadastro e recuperação de senha leem o e-mail real do GoTrue.
+            sed -i '/^\[inbucket\]/,/^\[/ s/^enabled = false$/enabled = true/' supabase/config.toml
+          fi
+          set -o pipefail
+          startup_log=$(mktemp)
+          trap 'rm -f "$startup_log"' EXIT
+          if supabase start 2>&1 | tee "$startup_log"; then
+            exit 0
+          fi
+          if ! grep -Fq 'address already in use' "$startup_log"; then
+            exit 1
+          fi
+          # O CLI limpa os contêineres após a falha. Uma nova tentativa
+          # cobre a colisão transitória de porta sem esconder erro persistente.
+          sleep 5
           supabase start
 
       # O baseline é um dump `--schema-only`: ele USA os tipos das extensões

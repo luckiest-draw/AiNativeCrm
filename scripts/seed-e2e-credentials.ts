@@ -145,21 +145,26 @@ async function ensureOrg(): Promise<string> {
   return orgId;
 }
 
-async function ensureUser(email: string, full_name: string): Promise<string> {
+async function ensureUser(email: string, full_name: string, locale?: "pt-BR"): Promise<string> {
+  const userMetadata = { full_name, ...(locale ? { locale } : {}) };
   // listUsers paginado — perPage default 50; nosso pool é pequeno
   const { data: list } = await admin.auth.admin.listUsers({ perPage: 200 });
   const existing = list.users.find((u) => u.email === email);
   if (existing) {
     console.log(`[seed] user existing ${email}: ${existing.id}`);
     // garantir senha conhecida
-    await admin.auth.admin.updateUserById(existing.id, { password: PASSWORD });
+    const { error } = await admin.auth.admin.updateUserById(existing.id, {
+      password: PASSWORD,
+      user_metadata: { ...existing.user_metadata, ...userMetadata },
+    });
+    if (error) throw new Error("update test user: " + error.message);
     return existing.id;
   }
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { full_name },
+    user_metadata: userMetadata,
   });
   if (error || !data?.user) throw new Error(`create user ${email}: ${error?.message}`);
   console.log(`[seed] user created ${email}: ${data.user.id}`);
@@ -330,7 +335,8 @@ async function main(): Promise<void> {
 
   const users: Record<string, { id: string; email: string; role: string }> = {};
   for (const u of USERS) {
-    const userId = await ensureUser(u.email, u.full_name);
+    // O painel da instalação resolve idioma pela preferência da conta.
+    const userId = await ensureUser(u.email, u.full_name, u.chave === "dono" ? "pt-BR" : undefined);
     await ensureMembership(userId, orgId, u.role);
     users[u.chave] = { id: userId, email: u.email, role: u.role };
   }

@@ -486,7 +486,12 @@ export class PiAgentRuntime implements AgentRuntime {
           ...(decision.terminate !== undefined ? { terminate: decision.terminate } : {}),
         };
       },
-      shouldStopAfterTurn: async ({ message }) => {
+      finishTurn: async ({ message }) => {
+        if (
+          message.role === "assistant" &&
+          (message.stopReason === "error" || message.stopReason === "aborted")
+        )
+          return;
         turns += 1;
         if (message.role === "assistant") {
           usage = addUsage(usage, usageOf(message.usage));
@@ -496,7 +501,8 @@ export class PiAgentRuntime implements AgentRuntime {
           converted === null
             ? false
             : await input.shouldStopAfterTurn?.({ message: converted, turn: turns, usage });
-        return requested === true || (input.maxTurns !== undefined && turns >= input.maxTurns);
+        if (requested === true || (input.maxTurns !== undefined && turns >= input.maxTurns))
+          return { action: "end" };
       },
     });
 
@@ -561,7 +567,7 @@ export class PiAgentRuntime implements AgentRuntime {
       }
       if (!input.steering || event.message.stopReason === "error" ||
           event.message.stopReason === "aborted" || input.abortSignal?.aborted ||
-          (input.maxTurns !== undefined && turns + 1 >= input.maxTurns)) return;
+          (input.maxTurns !== undefined && turns >= input.maxTurns)) return;
       await queuePendingSteering();
     });
 

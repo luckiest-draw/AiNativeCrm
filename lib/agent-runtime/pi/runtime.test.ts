@@ -440,8 +440,11 @@ describe("PiAgentRuntime", () => {
     const { runtime } = runtimeWithFaux([
       fauxAssistantMessage("", { stopReason: "error" }),
     ]);
+    const stopPolicy = vi.fn(() => false);
     const result = await runtime.run({ systemPrompt: "CRM", prompt: "核对商机", model,
+      shouldStopAfterTurn: stopPolicy,
       steering: { poll: async () => [{ id: "direction-failed", content: "先核对新合同" }] } });
+    expect(stopPolicy).not.toHaveBeenCalled();
     expect(result.events.some((event) => event.type === "steering_queued")).toBe(true);
     expect(result.events.some((event) => event.type === "steering_consumed")).toBe(false);
   });

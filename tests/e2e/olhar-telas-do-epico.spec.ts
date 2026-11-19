@@ -20,6 +20,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afirmarAdminDeTenantPuro } from "./utils/precondicao";
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
+import { isAppUrl } from "./helpers/auth";
 
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
 const EVIDENCIA = path.join(process.cwd(), "evidence", "ia-360-w5");
@@ -87,7 +88,7 @@ test.describe("as telas do épico abrem para uma pessoa", () => {
     await page.waitForTimeout(msUntilNextTotpWindow() + 200);
     await page.locator('input[aria-label="Dígito 1"]').click();
     await page.keyboard.type(generateTotp(creds.admin_totp!.secret), { delay: 60 });
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(isAppUrl, { timeout: 30_000 });
 
     const quebradas: string[] = [];
 

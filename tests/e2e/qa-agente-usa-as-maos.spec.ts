@@ -28,6 +28,7 @@ import { test, expect, type Page, type APIRequestContext } from "@playwright/tes
 import { afirmarAdminDeTenantPuro } from "./utils/precondicao";
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
 import { catalogoEntregueAoOperador } from "@/lib/agent-engine/agent/entrega-de-capacidade";
+import { isAppUrl } from "./helpers/auth";
 
 const APP_URL = `http://localhost:${process.env.E2E_PORT ?? "3001"}`;
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
@@ -315,7 +316,7 @@ async function login(page: Page): Promise<void> {
     await page.locator('input[aria-label="Dígito 1"]').click();
     await page.keyboard.type(generateTotp(secret!), { delay: 40 });
     try {
-      await page.waitForURL(/\/app\//, { timeout: 8_000 });
+      await page.waitForURL(isAppUrl, { timeout: 8_000 });
       return;
     } catch {
       await page.waitForTimeout(msUntilNextTotpWindow() + 200);
@@ -419,8 +420,8 @@ test.describe("QA — o agente usa as mãos que a W4 entregou?", () => {
 
     const agentesRes = await page.request.get(`${APP_URL}/api/v1/ai/agents`);
     const agentes = (await agentesRes.json()) as { data?: Array<{ id: string; name: string }> };
-    const agenteId = agentes.data?.[0]?.id;
-    expect(agenteId, "a org de E2E precisa de um agente").toBeTruthy();
+    const agenteId = agentes.data?.find((agente) => agente.name === "Bot Padrão E2E")?.id;
+    expect(agenteId, "a org de E2E precisa do agente editável criado pelo seed").toBeTruthy();
 
     const versaoId = await versaoComAsCapacidades(page.request, agenteId!);
     console.info(`[QA] versão de teste ${versaoId} com ${CAPACIDADES.length} capacidades`);

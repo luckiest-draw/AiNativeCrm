@@ -71,6 +71,7 @@ import * as path from "node:path";
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { carregarEnvLocal } from "../../scripts/lib/env-de-teste";
+import { isAppUrl } from "./helpers/auth";
 
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
 
@@ -160,7 +161,7 @@ test.describe("degradação silenciosa do tempo real", () => {
     await page.getByLabel(/e-?mail/i).fill(creds.users.manager!.email);
     await page.getByLabel(/senha/i).fill(creds.password);
     await page.getByRole("button", { name: /entrar|acessar/i }).click();
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(isAppUrl, { timeout: 30_000 });
 
     const { data: pipes } = await admin
       .from("crm_pipelines")

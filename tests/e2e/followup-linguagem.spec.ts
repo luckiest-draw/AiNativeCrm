@@ -21,6 +21,7 @@ import * as path from "node:path";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 
 import { VALORES_DE_WIRE_NA_TELA_PROIBIDOS } from "../support/enums-do-grafo";
+import { isAppUrl } from "./helpers/auth";
 
 const PRAZO_SOB_CARGA = 60_000;
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
@@ -47,7 +48,7 @@ async function login(page: Page, email: string, senha: string): Promise<void> {
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(senha);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//, { timeout: PRAZO_SOB_CARGA });
+  await page.waitForURL(isAppUrl, { timeout: PRAZO_SOB_CARGA });
 }
 
 /**

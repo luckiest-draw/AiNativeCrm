@@ -37,8 +37,9 @@ vi.mock("@/lib/ai/dispatcher/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 vi.mock("@/lib/agent-engine/agent/conversa-do-caso", () => ({
   responderSobreOCaso: vi.fn(),
 }));
+const { runtime } = vi.hoisted(() => ({ runtime: { run: vi.fn() } }));
 vi.mock("@/lib/agent-engine/agent/request-deps", () => ({
-  requestTurnDeps: () => ({ llmCfg: { anthropicApiKey: "k" }, log: undefined, registry: undefined }),
+  requestTurnDeps: () => ({ llmCfg: { anthropicApiKey: "k" }, log: undefined, runtime }),
 }));
 vi.mock("@/lib/agent-engine/agent/conversa-do-caso/persona", async (original) => ({
   ...(await original<Record<string, unknown>>()),
@@ -220,6 +221,7 @@ describe("POST — o que acontece com o contato", () => {
     expect(r.status).toBe(200);
     expect(await r.json()).toMatchObject({ data: { contato_bloqueado: true } });
     expect(responderSobreOCaso).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(responderSobreOCaso).mock.calls[0]?.[3]?.runtime).toBe(runtime);
   });
 });
 

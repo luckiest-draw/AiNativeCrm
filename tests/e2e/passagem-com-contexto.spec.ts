@@ -241,6 +241,7 @@ test.describe("a passagem para humano chega com contexto", () => {
               fundo: getComputedStyle(b).backgroundColor,
             }
           : null,
+        fonteDaPagina: getComputedStyle(document.body).fontFamily,
         rolagemHorizontal:
           document.documentElement.scrollWidth - document.documentElement.clientWidth,
         janela: window.innerWidth,
@@ -258,7 +259,7 @@ test.describe("a passagem para humano chega com contexto", () => {
     expect(m.botao, "a passagem aberta tem de oferecer o gesto de assumir").not.toBeNull();
     expect(m.botao!.visivel).toBe(true);
     expect(m.botao!.altura).toBeGreaterThanOrEqual(28);
-    expect(m.botao!.fonte).toMatch(/Atkinson/i);
+    expect(m.botao!.fonte).toBe(m.fonteDaPagina);
     // O convite tem de estar DENTRO da janela quando a pessoa chega. O fio rola
     // sozinho para o fim, e a passagem cala a IA — então o cartão é quase sempre
     // o último evento. Se este par sair da janela, o gesto existe e ninguém o vê.

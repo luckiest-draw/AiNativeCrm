@@ -29,6 +29,7 @@ import * as path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 import { carregarEnvLocal } from "../../scripts/lib/env-de-teste";
+import { isAppUrl } from "./helpers/auth";
 
 const APP_URL = `http://localhost:${process.env.E2E_PORT ?? "3001"}`;
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
@@ -78,7 +79,7 @@ async function login(page: Page, email: string): Promise<void> {
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(creds.password);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//);
+  await page.waitForURL(isAppUrl);
 }
 
 /** Grafo mínimo publicável: trigger → wait(5min) → ação(ai_message) → fim.
