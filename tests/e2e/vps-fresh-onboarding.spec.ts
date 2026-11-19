@@ -437,7 +437,7 @@ test.describe("J1 — onboarding do dono numa instalação fresca", () => {
 
   test("J1.10 verificação em duas etapas: ativa pela tela e VÊ os códigos de recuperação", async ({ page }) => {
     await login(page);
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(({ pathname }) => /^\/app(?:\/|$)/.test(pathname), { timeout: 30_000 });
 
     // ⚠️ ESTE CASO MUDOU DE PORTA, e a mudança é o ponto. Ele testava o
     // BLOQUEADOR não-dismissível que aparecia sozinho para todo admin — e era
@@ -558,7 +558,7 @@ test.describe("J1 — onboarding do dono numa instalação fresca", () => {
     if (msUntilNextTotpWindow() < 4_000) await page.waitForTimeout(msUntilNextTotpWindow() + 300);
     await page.locator('input[aria-label="Dígito 1"]').click();
     await page.keyboard.type(generateTotp(state.totp_secret), { delay: 40 });
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(({ pathname }) => /^\/app(?:\/|$)/.test(pathname), { timeout: 30_000 });
 
     await page.goto("/onboarding");
     await page.waitForURL(/\/app\/inbox/, { timeout: 15_000 });
