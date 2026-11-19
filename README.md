@@ -1,26 +1,31 @@
+<div align="center">
+
 # Pi Native CRM
 
-以真实 CRM 为状态空间的 Agent 原生工作台。
+**面向跨境客户经营的 Agent 原生 CRM**
 
-让 Agent 读取客户与商机，消费知识和记忆，调用工具推进业务；让人看清它做了什么、依据什么，以及 CRM 发生了哪些变化。
+让 Agent 基于客户会话、商机和已确认记忆推进跟进，让负责人查看执行依据、审批动作与 CRM 状态变化。
 
-[架构说明](docs/architecture/README.md) · [服务接入](docs/integrations/agent-services.md) · [开发配置](docs/SETUP.md) · [验证记录](docs/testing/system-acceptance-fixes-2026-10-03.md)
+**[打开移动端在线演示](https://crm.helson.top/mobile)** · [快速开始](#快速开始) · [Agent 架构](docs/architecture/README.md) · [服务接入](docs/integrations/agent-services.md)
 
-> CRM 保存业务事实，Pi 驱动 Agent 行动，Harness 管理执行边界。
+</div>
 
-## 我们的产品
+## 在线演示
 
-Pi Native CRM 是一个内部研发的 Agent-native CRM 工作台。联系人、会话、商机、跟进任务和知识库构成 Agent 的工作环境；自然语言目标成为执行入口。
+打开演示后选择 **先看看演示 → 工作台 → 客户记忆闭环**。以一次客户回访为例，查看 Agent 怎样读取已确认的联系时段和预算，识别待审核的记忆，并提出需要人工批准的回访任务。
 
-我们关注的不只是生成一段回复，而是完整的业务动作：理解上下文、寻找证据、拆解任务、协同调查、调用工具、观察结果，再决定下一步。CRM 的价值在于提供真实对象、业务约束和可核验的状态变化。
+| 会话收件箱 | Agent 工作台 | 客户记忆 |
+| :---: | :---: | :---: |
+| <img src="docs/evidence/readme-mobile/inbox.png" width="240" alt="移动端会话收件箱，显示 AI 托管和人工接管状态" /> | <img src="docs/evidence/readme-mobile/workbench.png" width="240" alt="Agent 回访建议、工具调用记录和人工审批操作" /> | <img src="docs/evidence/readme-mobile/memory.png" width="240" alt="客户记忆页，显示组织规则、已确认记忆与待审核候选" /> |
+| 查看会话与接管状态 | 查看工具调用和待审批动作 | 查看组织规则与客户约束 |
 
-打开工作台，选择一个内置 Agent 和目标对象，就能开始任务。执行过程、工具调用、审批、数据变化与评测都围绕同一个 Run 展开。
+截图来自在线移动端演示。页面使用虚构数据，操作不会发送真实消息。
 
 ## 核心功能
 
 ### Agent 工作台
 
-- 以任务和 CRM 对象为入口，支持只读调查与行动模式。
+- 选择内置 Agent 和目标 CRM 对象，以自然语言发起只读调查或行动任务。
 - 在同一条时间线上查看上下文、决策、工具调用、Observation 和状态变化。
 - 查看模型绑定、Token 用量、工具次数、预算与终止原因。
 - 通过持久化事件和 SSE 续读，在刷新后回放执行过程。
@@ -137,13 +142,13 @@ pnpm dev:crons
 
 Mem0、WeKnora 与 Langfuse 的本地服务部署和组织绑定，见 [本地服务指南](infra/local-agent-services/README.md)与[接入契约](docs/integrations/agent-services.md)。
 
-### 演示与真实运行回放
+### 本地演示与真实运行回放
 
 ```bash
 node scripts/serve-agent-demo.mjs
 ```
 
-打开 [演示工作台](http://127.0.0.1:3008/#/app/ai/workbench)。演示包含合成 CRM 场景与脱敏的真实模型录制；“真实模型录制”展示历史输入输出、工具调用、记忆、知识引用与评测，不重新发起模型请求。演示页面与真实后端独立运行。
+打开 [本地演示工作台](http://127.0.0.1:3008/#/app/ai/workbench)。这里可以体验合成 CRM 场景，并回看脱敏的真实模型输入输出、工具调用、记忆、知识引用与评测。回放读取历史记录，演示页面独立于 CRM 后端运行。
 
 ### 常用命令
 
