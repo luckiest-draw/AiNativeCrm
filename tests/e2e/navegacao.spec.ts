@@ -162,9 +162,9 @@ test.describe("navegação agrupada", () => {
     await page.waitForURL(/\/app\/ai$/);
 
     // O hub organiza por jornada, não numa grade solta.
-    await expect(page.getByRole("heading", { name: "Montar o agente" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Ensinar o agente" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Acompanhar o agente" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Preparar o agente" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dar contexto ao agente" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Revisar operações" })).toBeVisible();
 
     await page.screenshot({ path: path.join(EVIDENCE, "nav-hub-ia.png"), fullPage: true });
 

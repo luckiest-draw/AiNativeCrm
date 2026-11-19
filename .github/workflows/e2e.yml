@@ -1299,6 +1299,10 @@ jobs:
         run: |
           mv supabase/migrations /tmp/migrations-off
           mkdir -p supabase/migrations
+          if [ "${{ matrix.parte }}" = "1" ]; then
+            # Cadastro e recuperação de senha leem o e-mail real do GoTrue.
+            sed -i '/^\[inbucket\]/,/^\[/ s/^enabled = false$/enabled = true/' supabase/config.toml
+          fi
           supabase start
 
       # O baseline é um dump `--schema-only`: ele USA os tipos das extensões
