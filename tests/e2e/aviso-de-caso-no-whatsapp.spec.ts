@@ -50,6 +50,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
 import { carregarEnvLocal } from "../../scripts/lib/env-de-teste";
+import { isAppUrl } from "./helpers/auth";
 
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
 const EVIDENCIA = path.join(process.cwd(), "evidence", "casos-vivos", "aviso");
@@ -122,7 +123,7 @@ async function loginComTotp(page: Page, email: string, secret: string): Promise<
     await primeiroDigito.click();
     await page.keyboard.type(generateTotp(secret), { delay: 40 });
     try {
-      await page.waitForURL(/\/app\//, { timeout: 30_000 });
+      await page.waitForURL(isAppUrl, { timeout: 30_000 });
       return;
     } catch {
       await page.waitForTimeout(msUntilNextTotpWindow() + 200);

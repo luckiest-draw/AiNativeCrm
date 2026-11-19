@@ -17,6 +17,7 @@ import { zoomAte } from "./utils/canvas-do-fluxo";
 
 import { afirmarAdminDeTenantPuro } from "./utils/precondicao";
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
+import { isAppUrl } from "./helpers/auth";
 
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
 // test-results/ é limpo pelo outputDir do Playwright a cada run — preserva a
@@ -65,7 +66,7 @@ async function login(page: Page, email: string): Promise<void> {
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(creds.password);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//);
+  await page.waitForURL(isAppUrl);
 }
 
 /**
@@ -90,7 +91,7 @@ async function loginWithTotp(page: Page, email: string, secret: string): Promise
     await firstDigit.click();
     await page.keyboard.type(code, { delay: 40 });
     try {
-      await page.waitForURL(/\/app\//, { timeout: 8_000 });
+      await page.waitForURL(isAppUrl, { timeout: 8_000 });
       return;
     } catch {
       await page.waitForTimeout(msUntilNextTotpWindow() + 200);

@@ -72,6 +72,7 @@ import * as zlib from "node:zlib";
 import { test, expect, type Page, type Browser, type Locator } from "@playwright/test";
 
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
+import { isAppUrl } from "./helpers/auth";
 
 const CREDS_PATH = path.join(process.cwd(), ".e2e-creds.json");
 const EVIDENCIA = path.join(process.cwd(), "evidence", "marca-logo");
@@ -223,7 +224,7 @@ async function loginComTotp(page: Page, email: string, secret: string): Promise<
     await page.keyboard.type(generateTotp(secret), { delay: 40 });
 
     const desfecho = await Promise.race([
-      page.waitForURL(/\/app\//, { timeout: 60_000 }).then(
+      page.waitForURL(isAppUrl, { timeout: 60_000 }).then(
         () => "entrou" as const,
         () => "sem-desfecho" as const,
       ),

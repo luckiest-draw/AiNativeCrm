@@ -16,6 +16,7 @@ import { randomUUID } from "node:crypto";
 
 import { test, expect, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { isAppUrl } from "./helpers/auth";
 
 const svc = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -87,7 +88,7 @@ test.describe.configure({ mode: "serial", timeout: 90_000 });
 test.describe("a verificação em duas etapas é escolha, não imposição", () => {
   test("admin entra no sistema sem ser parado", async ({ page }) => {
     await entrar(page);
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(isAppUrl, { timeout: 30_000 });
     await expect(page.locator("body")).not.toContainText(BLOQUEADOR);
   });
 
@@ -98,7 +99,7 @@ test.describe("a verificação em duas etapas é escolha, não imposição", () 
     // novamente para iniciar o enrolamento", que com o gate desligado nunca
     // aconteceria.
     await entrar(page);
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(isAppUrl, { timeout: 30_000 });
     await page.goto("/app/settings/security");
 
     await expect(page.getByText("Desativada")).toBeVisible();
@@ -114,7 +115,7 @@ test.describe("a verificação em duas etapas é escolha, não imposição", () 
 
   test("o admin pode EXIGIR da equipe — e a exigência pega de verdade", async ({ page }) => {
     await entrar(page);
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(isAppUrl, { timeout: 30_000 });
     await page.goto("/app/settings/security");
 
     await page.locator('input[type="checkbox"]').click();
@@ -146,7 +147,7 @@ test.describe("a verificação em duas etapas é escolha, não imposição", () 
       .eq("id", orgId);
 
     await entrar(page);
-    await page.waitForURL(/\/app\//, { timeout: 30_000 });
+    await page.waitForURL(isAppUrl, { timeout: 30_000 });
     await expect(page.locator("body")).not.toContainText(BLOQUEADOR);
   });
 });

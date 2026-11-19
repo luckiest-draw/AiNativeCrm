@@ -3,6 +3,8 @@ import { mkdirSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import { test, expect, type Page } from "@playwright/test";
 import { credenciaisSupabaseDeTeste } from "../../scripts/lib/env-de-teste";
+import { isAppUrl } from "./helpers/auth";
+
 const credentials = credenciaisSupabaseDeTeste();
 const db = createClient(credentials.url, credentials.serviceRole, {
   auth: { persistSession: false },
@@ -14,7 +16,7 @@ async function login(page: Page, email: string) {
   await page.getByLabel(/e-?mail/i).fill(email);
   await page.getByLabel(/senha/i).fill(password);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//, { timeout: 60_000 });
+  await page.waitForURL(isAppUrl, { timeout: 60_000 });
 }
 const nav = (page: Page) => page.getByRole("navigation", { name: "Navegação principal" });
 async function customize(page: Page, email: string, only?: string) {

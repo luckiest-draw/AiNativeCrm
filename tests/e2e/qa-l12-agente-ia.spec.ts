@@ -15,6 +15,7 @@ import { test } from "@playwright/test";
 
 import { admin, captura, creds, expect, registra, type Creds } from "./qa-l12-comum";
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
+import { isAppUrl } from "./helpers/auth";
 
 const ROTULO = "Ver se o horário está livre e já marcar";
 
@@ -46,7 +47,7 @@ async function loginComTotp(
     await digito1.click({ timeout: 15_000 });
     await page.keyboard.type(generateTotp(segredo), { delay: 40 });
     const desfecho = await Promise.race([
-      page.waitForURL(/\/app\//, { timeout: 60_000 }).then(() => "entrou" as const, () => "nada" as const),
+      page.waitForURL(isAppUrl, { timeout: 60_000 }).then(() => "entrou" as const, () => "nada" as const),
       recusa.waitFor({ state: "visible", timeout: 60_000 }).then(() => "recusado" as const, () => "nada" as const),
     ]);
     if (desfecho === "entrou") return;

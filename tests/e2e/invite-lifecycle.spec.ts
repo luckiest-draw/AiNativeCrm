@@ -27,6 +27,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import { signInviteToken } from "../../lib/auth/invite-token";
 import { generateTotp, msUntilNextTotpWindow } from "./utils/totp";
+import { isAppUrl } from "./helpers/auth";
 
 // ---- creds do seed base (.e2e-creds.json) + do convite (.e2e-invite.json) ----
 interface BaseCreds {
@@ -92,7 +93,7 @@ async function login(page: Page, email: string): Promise<void> {
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(base.password);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//);
+  await page.waitForURL(isAppUrl);
 }
 
 async function loginAdminTotp(page: Page): Promise<void> {
@@ -109,10 +110,10 @@ async function loginAdminTotp(page: Page): Promise<void> {
     await page.keyboard.type(generateTotp(secret), { delay: 40 });
     try {
       // 1ª compilação de /app no dev pode ser lenta → timeout generoso
-      await page.waitForURL(/\/app\//, { timeout: 30_000 });
+      await page.waitForURL(isAppUrl, { timeout: 30_000 });
       return;
     } catch {
-      if (/\/app\//.test(page.url())) return; // navegou; só passou do timeout
+      if (isAppUrl(new URL(page.url()))) return; // navegou; só passou do timeout
       if (!/\/login\/mfa/.test(page.url())) throw new Error(`MFA em estado inesperado: ${page.url()}`);
       await page.waitForTimeout(msUntilNextTotpWindow() + 300); // código recusado → nova janela
     }
@@ -151,7 +152,7 @@ test.describe("ciclo de vida do convite (ponta a ponta + adversarial)", () => {
     await page.locator("#email").fill(base.users.agent!.email);
     await page.locator("#password").fill(base.password);
     await page.getByRole("button", { name: /entrar/i }).click();
-    await page.waitForURL(/\/app\//, { timeout: 150_000 }).catch(() => {});
+    await page.waitForURL(isAppUrl, { timeout: 150_000 }).catch(() => {});
     for (const r of ["/app/inbox", "/app/kanban", "/app/contacts", "/app/settings/billing", "/app/settings/api-tokens"]) {
       await page.goto(r).catch(() => {});
     }

@@ -15,6 +15,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 import { lerCreds, loginComoAdmin } from "./helpers/login-admin";
 import { afirmarAdminDeTenantPuro } from "./utils/precondicao";
+import { isAppUrl } from "./helpers/auth";
 
 let creds = lerCreds();
 const EVIDENCE = path.join(process.cwd(), ".superpowers", "evidence");
@@ -42,7 +43,7 @@ async function login(page: Page, email: string): Promise<void> {
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(creds.password);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//);
+  await page.waitForURL(isAppUrl);
 }
 
 async function loginAdmin(page: Page): Promise<void> {

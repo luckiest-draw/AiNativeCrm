@@ -1,15 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { IDIOMA_PADRAO } from "@/lib/i18n/idiomas";
+import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
 
-// Manutenção é justamente o cenário em que o Supabase pode estar fora do ar —
-// esta página não pode depender dele para saber em que idioma falar. Sem
-// sessão para consultar, fica no idioma padrão da instalação.
-const idioma = IDIOMA_PADRAO;
-
-export default function ServiceUnavailablePage() {
+export default async function ServiceUnavailablePage() {
+  // O idioma do navegador está disponível mesmo com o Supabase fora do ar.
+  const idioma = await idiomaDoVisitante(null);
   return (
     <main className="flex min-h-screen items-center justify-center p-8">
       <Card className="w-full max-w-md p-8 text-center">

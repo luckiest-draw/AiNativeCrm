@@ -29,6 +29,7 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 import { zoomAte } from "./utils/canvas-do-fluxo";
+import { isAppUrl } from "./helpers/auth";
 
 const CREDS_PATH = ".e2e-creds.json";
 const ARTIFACTS_DIR = "evidence/followup-cartoes";
@@ -55,7 +56,7 @@ async function login(page: Page, email: string): Promise<void> {
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(creds.password);
   await page.getByRole("button", { name: /entrar/i }).click();
-  await page.waitForURL(/\/app\//, { timeout: PRAZO });
+  await page.waitForURL(isAppUrl, { timeout: PRAZO });
 }
 
 async function novoFluxo(page: Page, nome: string): Promise<string> {
