@@ -52,6 +52,7 @@ test("interface por membro atualiza ao vivo, preserva formulário e convite apli
         email,
         password,
         email_confirm: true,
+        user_metadata: { locale: "pt-BR" },
       });
       if (error || !data.user) throw error;
       users.push(data.user.id);

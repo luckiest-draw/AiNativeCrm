@@ -140,9 +140,9 @@ async function inbound(
 async function login(page: Page, email: string) {
   await page.context().clearCookies();
   await page.goto("/login");
-  await page.getByLabel(/e-?mail/i).fill(email);
-  await page.getByLabel(/senha/i).fill(password);
-  await page.getByRole("button", { name: /entrar/i }).click();
+  await page.locator("#email").fill(email);
+  await page.locator("#password").fill(password);
+  await page.getByRole("button", { name: /^(entrar|登录)$/i }).click();
   await page.waitForURL(/\/app(?:\/|$)/, { timeout: 60000 });
 }
 async function detail(page: Page, id: string, title: string) {
@@ -971,7 +971,12 @@ test("Radar recorta demandas pela RLS real, além do pool frio, e preserva gest�
   const members: Record<string, { id: string; email: string }> = {};
   for (const role of ["agent", "other", "manager", "viewer"]) {
     const email = `radar-${role}-${randomUUID()}@invariant.test`;
-    const made = await db.auth.admin.createUser({ email, password, email_confirm: true });
+    const made = await db.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { locale: "pt-BR" },
+    });
     if (made.error || !made.data.user) throw made.error;
     const id = made.data.user.id;
     users.push(id);

@@ -39,7 +39,12 @@ test("org única oferece criação, responsável aceita e A→B→A não mistura
   let guestContext;
   try {
     for (const email of [ownerEmail, guestEmail]) {
-      const { data, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
+      const { data, error } = await db.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { locale: "pt-BR" },
+      });
       if (error || !data.user) throw error ?? new Error("user missing");
       users.push(data.user.id);
     }
@@ -133,7 +138,8 @@ test("org única oferece criação, responsável aceita e A→B→A não mistura
     if (update.error) throw update.error;
     await conversation(orgB, `Cliente B ${suffix}`);
     await page.getByRole("link", { name: "Voltar ao aplicativo" }).click();
-    await page.waitForURL("**/app/inbox", { waitUntil: "load" });
+    await page.waitForURL((url) => url.pathname === "/app");
+    await page.goto("/app/inbox");
     await expect(page.locator("[data-conversation-id]").getByText(`Cliente A ${suffix}`, { exact: true })).toBeVisible();
     const cookieBeforeFailure = (await page.context().cookies()).find(cookie => cookie.name === "active_org")?.value;
     await page.route("**/app/**", async route => {
